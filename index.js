@@ -27,6 +27,12 @@ async function run() {
             console.log(result);
             res.json(result)
         })
+        app.get('/facilities', async(req, res) => {
+            const allFacilities = await facilitiesCollection.find().toArray()
+            console.log(allFacilities);
+            res.send(allFacilities)
+            
+        })
 
         console.log("Pinged your deployment. You successfully connected to MongoDB!");
     } finally {
