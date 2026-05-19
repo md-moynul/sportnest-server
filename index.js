@@ -10,6 +10,32 @@ app.use(cors())
 app.use(express.json())
 
 
+const client = new MongoClient(uri, {
+    serverApi: {
+        version: ServerApiVersion.v1,
+        strict: true,
+        deprecationErrors: true,
+    }
+});
+async function run() {
+    try {
+        const db = client.db('sportnest')
+        const facilitiesCollection = db.collection('facilities')
+        app.post('/facilities', async (req, res) => {
+            const facility = req.body
+            const result = await facilitiesCollection.insertOne(facility)
+            console.log(result);
+            res.json(result)
+        })
+
+        console.log("Pinged your deployment. You successfully connected to MongoDB!");
+    } finally {
+        // Ensures that the client will close when you finish/error
+        // await client.close();
+    }
+}
+run().catch(console.dir);
+
 app.get('/', (req, res) => {
     res.send('Hello World!')
 })
