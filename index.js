@@ -21,10 +21,11 @@ async function run() {
     try {
         const db = client.db('sportnest')
         const facilitiesCollection = db.collection('facilities')
+        const bookingsCollection = db.collection('bookings')
+            // facilities
         app.post('/facilities', async (req, res) => {
             const facility = req.body
             const result = await facilitiesCollection.insertOne(facility)
-            console.log(result);
             res.json(result)
         })
         app.get('/facilities', async(req, res) => {
@@ -39,6 +40,13 @@ async function run() {
             console.log(result);
             res.send(result)
             
+        })
+        // Booking
+        app.post('/bookings' ,async(req ,res) =>{
+            const bookingData = req.body
+            const result = await bookingsCollection.insertOne(bookingData)
+            console.log(result);
+            res.send(result)
         })
 
         console.log("Pinged your deployment. You successfully connected to MongoDB!");
