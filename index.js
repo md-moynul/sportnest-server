@@ -49,6 +49,12 @@ async function run() {
             res.send(result)
 
         })
+        app.delete('/facilities/:id' , async(req ,res) => {
+            const id = req.params.id;
+            const query = {_id : new ObjectId(id)}
+            const result = await facilitiesCollection.deleteOne(query)
+            res.send(result)
+        })
         // Booking
         app.post('/bookings', async (req, res) => {
             const bookingData = req.body
