@@ -22,43 +22,49 @@ async function run() {
         const db = client.db('sportnest')
         const facilitiesCollection = db.collection('facilities')
         const bookingsCollection = db.collection('bookings')
-            // facilities
+        // facilities
         app.post('/facilities', async (req, res) => {
             const facility = req.body
             const result = await facilitiesCollection.insertOne(facility)
             res.json(result)
         })
-        app.get('/facilities', async(req, res) => {
+        app.get('/facilities', async (req, res) => {
             const allFacilities = await facilitiesCollection.find().toArray()
             // console.log(allFacilities);
             res.send(allFacilities)
         })
-        app.get('/facilities/:id' ,async(req ,res) =>{
+        app.get('/facilities/:id', async (req, res) => {
             const id = req.params.id;
-            const query = {_id : new ObjectId(id)}
+            const query = { _id: new ObjectId(id) }
             const result = await facilitiesCollection.findOne(query)
             console.log(result);
             res.send(result)
-            
+
         })
         // Booking
-        app.post('/bookings' ,async(req ,res) =>{
+        app.post('/bookings', async (req, res) => {
             const bookingData = req.body
             const result = await bookingsCollection.insertOne(bookingData)
             res.send(result)
         })
         // app.get('/bookings' ,async(req ,res) => {
         //     const userId = req.params.userId;
-            
+
         //     const allBookings = await bookingsCollection.find().toArray();
         //     res.send(allBookings)
         // })
-        app.get('/bookings/:userId' ,async(req ,res) => {
+        app.get('/bookings/:userId', async (req, res) => {
             const userId = req.params.userId;
-            const allBookings = await bookingsCollection.find( { userId: { $eq: userId }}).toArray();
+            const query = { userId: { $eq: userId } }
+            const allBookings = await bookingsCollection.find(query).toArray();
             res.send(allBookings)
         })
-      
+        app.delete('/bookings/:bookingId', async(req, res) => {
+            const bookingId = req.params.bookingId;
+            const result = await bookingsCollection.deleteOne({_id: new ObjectId(bookingId)})
+            res.send(result)
+        })
+
         console.log("Pinged your deployment. You successfully connected to MongoDB!");
     } finally {
         // Ensures that the client will close when you finish/error
