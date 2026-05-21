@@ -45,10 +45,20 @@ async function run() {
         app.post('/bookings' ,async(req ,res) =>{
             const bookingData = req.body
             const result = await bookingsCollection.insertOne(bookingData)
-            console.log(result);
             res.send(result)
         })
-
+        // app.get('/bookings' ,async(req ,res) => {
+        //     const userId = req.params.userId;
+            
+        //     const allBookings = await bookingsCollection.find().toArray();
+        //     res.send(allBookings)
+        // })
+        app.get('/bookings/:userId' ,async(req ,res) => {
+            const userId = req.params.userId;
+            const allBookings = await bookingsCollection.find( { userId: { $eq: userId }}).toArray();
+            res.send(allBookings)
+        })
+      
         console.log("Pinged your deployment. You successfully connected to MongoDB!");
     } finally {
         // Ensures that the client will close when you finish/error
