@@ -68,8 +68,8 @@ async function run() {
                     $options: "i"
                 };
             }
-            if(type){
-                query.facility_type ={
+            if (type) {
+                query.facility_type = {
                     $regex: type,
                     $options: "i"
                 }
@@ -115,6 +115,15 @@ async function run() {
         app.post('/bookings', async (req, res) => {
             const bookingData = req.body
             const result = await bookingsCollection.insertOne(bookingData)
+            if (result.insertedId) {
+                const facilityId = bookingData.facility_id;
+                if (facilityId) {
+                    await facilitiesCollection.updateOne(
+                        { _id: new ObjectId(facilityId) },
+                        { $inc: { booking_count: 1 } }
+                    );
+                }
+            }
             res.send(result)
         })
         // app.get('/bookings' ,async(req ,res) => {
