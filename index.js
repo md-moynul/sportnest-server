@@ -53,8 +53,28 @@ async function run() {
             const featuredData = await facilitiesCollection.find().limit(6).toArray()
             res.send(featuredData)
         })
+        // app.get('/facilities', async (req, res) => {
+        //     const allFacilities = await facilitiesCollection.find().toArray()
+        //     // console.log(allFacilities);
+        //     res.send(allFacilities)
+        // })
         app.get('/facilities', async (req, res) => {
-            const allFacilities = await facilitiesCollection.find().toArray()
+            const search = req.query.search || "";
+            const type = req.query.type || "";
+            let query = {};
+            if (search) {
+                query.name = {
+                    $regex: search,
+                    $options: "i"
+                };
+            }
+            if(type){
+                query.facility_type ={
+                    $regex: type,
+                    $options: "i"
+                }
+            }
+            const allFacilities = await facilitiesCollection.find(query).toArray()
             // console.log(allFacilities);
             res.send(allFacilities)
         })
@@ -103,7 +123,7 @@ async function run() {
         //     const allBookings = await bookingsCollection.find().toArray();
         //     res.send(allBookings)
         // })
-        app.get('/bookings/:userId',verifyToken, async (req, res) => {
+        app.get('/bookings/:userId', verifyToken, async (req, res) => {
             const userId = req.params.userId;
             const query = { userId: { $eq: userId } }
             const allBookings = await bookingsCollection.find(query).toArray();
