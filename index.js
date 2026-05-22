@@ -49,6 +49,10 @@ async function run() {
             const result = await facilitiesCollection.insertOne(facility)
             res.json(result)
         })
+        app.get('/featured', async (req, res) => {
+            const featuredData = await facilitiesCollection.find().limit(6).toArray()
+            res.send(featuredData)
+        })
         app.get('/facilities', async (req, res) => {
             const allFacilities = await facilitiesCollection.find().toArray()
             // console.log(allFacilities);
