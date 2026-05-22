@@ -33,10 +33,24 @@ async function run() {
             // console.log(allFacilities);
             res.send(allFacilities)
         })
-        app.get('/facilities/:id', async (req, res) => {
+        app.get('/facilities/:id', async (req, res,next) => {
             const id = req.params.id;
+            const headers = req.headers.authorization
+            console.log(headers);
+            
             const query = { _id: new ObjectId(id) }
             const result = await facilitiesCollection.findOne(query)
+            // console.log(result);
+            res.send(result)
+
+        })
+        app.patch('/facilities/:id', async (req, res) => {
+            const id = req.params.id;
+            const updatedFacilities = req.body;
+            const result = await facilitiesCollection.updateOne(
+                {_id : new ObjectId(id)},
+                {$set : updatedFacilities}
+            )
             // console.log(result);
             res.send(result)
 
