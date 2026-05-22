@@ -2,6 +2,7 @@ const express = require('express')
 const cors = require('cors')
 const dotenv = require('dotenv')
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
+const { createRemoteJWKSet, jwtVerify } = require('jose-cjs');
 const app = express()
 dotenv.config()
 const port = process.env.PORT;
@@ -17,6 +18,26 @@ const client = new MongoClient(uri, {
         deprecationErrors: true,
     }
 });
+const JWKS = createRemoteJWKSet(
+    new URL(`${process.env.CLIENT_URL}/api/auth/jwks`)
+)
+const verifyToken = async (req, res, next) => {
+    const header = req.headers.authorization
+    if (!header) {
+        res.status(401).json({ massage: 'Unauthorized' })
+    }
+    const token = header.split(" ")[1]
+    if (!token) {
+        res.status(401).json({ massage: 'Unauthorized' })
+    }
+    try {
+        const { payload } = await jwtVerify(token, JWKS)
+        // console.log(payload);
+        next()
+    } catch (error) {
+        return res.status(403).json({ massage: "Forbidden" })
+    }
+}
 async function run() {
     try {
         const db = client.db('sportnest')
@@ -33,11 +54,8 @@ async function run() {
             // console.log(allFacilities);
             res.send(allFacilities)
         })
-        app.get('/facilities/:id', async (req, res,next) => {
+        app.get('/facilities/:id', verifyToken, async (req, res, next) => {
             const id = req.params.id;
-            const headers = req.headers.authorization
-            console.log(headers);
-            
             const query = { _id: new ObjectId(id) }
             const result = await facilitiesCollection.findOne(query)
             // console.log(result);
@@ -48,24 +66,24 @@ async function run() {
             const id = req.params.id;
             const updatedFacilities = req.body;
             const result = await facilitiesCollection.updateOne(
-                {_id : new ObjectId(id)},
-                {$set : updatedFacilities}
+                { _id: new ObjectId(id) },
+                { $set: updatedFacilities }
             )
             // console.log(result);
             res.send(result)
 
         })
-        app.get('/facilities/user/:email', async (req, res) => {
+        app.get('/facilities/user/:email', verifyToken, async (req, res) => {
             const email = req.params.email;
-            const query = { owner_email : email }
+            const query = { owner_email: email }
             const result = await facilitiesCollection.find(query).toArray()
             // console.log(result);
             res.send(result)
 
         })
-        app.delete('/facilities/:id' , async(req ,res) => {
+        app.delete('/facilities/:id', async (req, res) => {
             const id = req.params.id;
-            const query = {_id : new ObjectId(id)}
+            const query = { _id: new ObjectId(id) }
             const result = await facilitiesCollection.deleteOne(query)
             res.send(result)
         })
@@ -81,15 +99,15 @@ async function run() {
         //     const allBookings = await bookingsCollection.find().toArray();
         //     res.send(allBookings)
         // })
-        app.get('/bookings/:userId', async (req, res) => {
+        app.get('/bookings/:userId',verifyToken, async (req, res) => {
             const userId = req.params.userId;
             const query = { userId: { $eq: userId } }
             const allBookings = await bookingsCollection.find(query).toArray();
             res.send(allBookings)
         })
-        app.delete('/bookings/:bookingId', async(req, res) => {
+        app.delete('/bookings/:bookingId', async (req, res) => {
             const bookingId = req.params.bookingId;
-            const result = await bookingsCollection.deleteOne({_id: new ObjectId(bookingId)})
+            const result = await bookingsCollection.deleteOne({ _id: new ObjectId(bookingId) })
             res.send(result)
         })
 
